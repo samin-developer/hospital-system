@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #333;
+        }
+
+        .sidebar {
+            position: fixed;
+            width: 240px;
+            height: 100vh;
+            background: #0d6efd;
+            color: white;
+            padding: 25px 15px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 14px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .main {
+            margin-left: 240px;
+            padding: 25px;
+        }
+
+        .topbar {
+            background: white;
+            padding: 18px 25px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .topbar h1 {
+            color: #0d6efd;
+        }
+
+        .profile {
+            font-weight: bold;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            color: #666;
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .card .number {
+            font-size: 30px;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        .content {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.05);
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        button {
+            background: #0d6efd;
+            color: white;
+            border: none;
+            padding: 11px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #095dcc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f5f8fc;
+            color: #555;
+        }
+
+        .status {
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .completed {
+            background: #d4edda;
+            color: #198754;
+        }
+
+        .pending {
+            background: #fff3cd;
+            color: #997404;
+        }
+
+        .cancelled {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .form-box {
+            max-width: 600px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 7px;
+            font-weight: bold;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 7px;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #0d6efd;
+        }
+
+        .mobile-menu {
+            display: none;
+        }
+
+        @media (max-width: 1000px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                left: -240px;
+                transition: 0.3s;
+                z-index: 1000;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .mobile-menu {
+                display: block;
+                background: #0d6efd;
+                color: white;
+                border: none;
+                font-size: 20px;
+                padding: 8px 12px;
+            }
+
+            .topbar h1 {
+                font-size: 20px;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                min-width: 700px;
+            }
+
+            .content {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <h2>🏥 MediCare</h2>
+
+        <a class="active" onclick="showSection('dashboard', this)">
+            📊 Dashboard
+        </a>
+
+        <a onclick="showSection('patients', this)">
+            👨‍🦽 Patients
+        </a>
+
+        <a onclick="showSection('doctors', this)">
+            👨‍⚕️ Doctors
+        </a>
+
+        <a onclick="showSection('appointments', this)">
+            📅 Appointments
+        </a>
+
+        <a onclick="showSection('medicines', this)">
+            💊 Medicines
+        </a>
+
+        <a onclick="showSection('billing', this)">
+            🧾 Billing
+        </a>
+
+        <a onclick="showSection('staff', this)">
+            👥 Staff
+        </a>
+
+        <a onclick="showSection('reports', this)">
+            📈 Reports
+        </a>
+    </div>
+
+    <!-- Main -->
+    <div class="main">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <button class="mobile-menu" onclick="toggleMenu()">☰</button>
+
+            <h1>Hospital Management System</h1>
+
+            <div class="profile">
+                👤 Admin
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="section active">
+
+            <div class="cards">
+
+                <div class="card">
+                    <h3>Total Patients</h3>
+                    <div class="number">1,248</div>
+                </div>
+
+                <div class="card">
+                    <h3>Total Doctors</h3>
+                    <div class="number">86</div>
+                </div>
+
+                <div class="card">
+                    <h3>Appointments</h3>
+                    <div class="number">324</div>
+                </div>
+
+                <div class="card">
+                    <h3>Available Beds</h3>
+                    <div class="number">42</div>
+                </div>
+
+            </div>
+
+            <div class="content">
+
+                <div class="content-header">
+                    <h2>Recent Appointments</h2>
+                    <button onclick="showSection('appointments')">
+                        View All
+                    </button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Ali Khan</td>
+                            <td>Dr. Ahmed</td>
+                            <td>17 Sep 2026</td>
+                            <td>10:00 AM</td>
+                            <td>
+                                <span class="status completed">
+                                    Completed
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Sarah Ali</td>
+                            <td>Dr. Fatima</td>
+                            <td>17 Sep 2026</td>
+                            <td>11:30 AM</td>
+                            <td>
+                                <span class="status pending">
+                                    Pending
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Usman Ahmed</td>
+                            <td>Dr. Bilal</td>
+                            <td>18 Sep 2026</td>
+                            <td>09:00 AM</td>
+                            <td>
+                                <span class="status pending">
+                                    Pending
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+        <!-- Patients -->
+        <div id="patients" class="section">
+
+            <div class="content">
+                <div class="content-header">
+                    <h2>Patient Management</h2>
+                    <button onclick="addPatient()">+ Add Patient</button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Age</th>
+                            <th>Gender</th>
+                            <th>Phone</th>
+                            <th>Department</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="patientTable">
+                        <tr>
+                            <td>P001</td>
+                            <td>Ali Khan</td>
+                            <td>32</td>
+                            <td>Male</td>
+                            <td>0300-1234567</td>
+                            <td>Cardiology</td>
+                        </tr>
+
+                        <tr>
+                            <td>P002</td>
+                            <td>Sarah Ali</td>
+                            <td>27</td>
+                            <td>Female</td>
+                            <td>0312-7654321</td>
+                            <td>Neurology</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Doctors -->
+        <div id="doctors" class="section">
+
+            <div class="content">
+                <div class="content-header">
+                    <h2>Doctors Management</h2>
+                    <button onclick="alert('Doctor form can be added here.')">
+                        + Add Doctor
+                    </button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Doctor</th>
+                            <th>Specialization</th>
+                            <th>Experience</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>D001</td>
+                            <td>Dr. Ahmed</td>
+                            <td>Cardiologist</td>
+                            <td>12 Years</td>
+                            <td>
+                                <span class="status completed">
+                                    Available
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>D002</td>
+                            <td>Dr. Fatima</td>
+                            <td>Neurologist</td>
+                            <td>8 Years</td>
+                            <td>
+                                <span class="status completed">
+                                    Available
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>D003</td>
+                            <td>Dr. Bilal</td>
+                            <td>Dermatologist</td>
+                            <td>6 Years</td>
+                            <td>
+                                <span class="status pending">
+                                    Busy
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Appointments -->
+        <div id="appointments" class="section">
+
+            <div class="content">
+                <div class="content-header">
+                    <h2>Appointments</h2>
+                    <button onclick="alert('Appointment form can be added here.')">
+                        + New Appointment
+                    </button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Doctor</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Ali Khan</td>
+                            <td>Dr. Ahmed</td>
+                            <td>17 Sep 2026</td>
+                            <td>10:00 AM</td>
+                            <td>
+                                <span class="status completed">
+                                    Completed
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Sarah Ali</td>
+                            <td>Dr. Fatima</td>
+                            <td>17 Sep 2026</td>
+                            <td>11:30 AM</td>
+                            <td>
+                                <span class="status pending">
+                                    Pending
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Medicines -->
+        <div id="medicines" class="section">
+
+            <div class="content">
+                <div class="content-header">
+                    <h2>Medicine Inventory</h2>
+                    <button onclick="alert('Medicine form can be added here.')">
+                        + Add Medicine
+                    </button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Medicine</th>
+                            <th>Category</th>
+                            <th>Quantity</th>
+                            <th>Expiry</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Paracetamol</td>
+                            <td>Tablet</td>
+                            <td>500</td>
+                            <td>12/2027</td>
+                            <td>
+                                <span class="status completed">
+                                    Available
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Amoxicillin</td>
+                            <td>Capsule</td>
+                            <td>120</td>
+                            <td>08/2027</td>
+                            <td>
+                                <span class="status pending">
+                                    Low Stock
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Billing -->
+        <div id="billing" class="section">
+
+            <div class="content">
+                <div class="content-header">
+                    <h2>Billing</h2>
+                    <button onclick="alert('New bill form can be added here.')">
+                        + Create Bill
+                    </button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Invoice</th>
+                            <th>Patient</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>#INV001</td>
+                            <td>Ali Khan</td>
+                            <td>17 Sep 2026</td>
+                            <td>Rs. 8,500</td>
+                            <td>
+                                <span class="status completed">
+                                    Paid
+                                </span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>#INV002</td>
+                            <td>Sarah Ali</td>
+                            <td>17 Sep 2026</td>
+                            <td>Rs. 12,000</td>
+                            <td>
+                                <span class="status pending">
+                                    Pending
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Staff -->
+        <div id="staff" class="section">
+
+            <div class="content">
+                <div class="content-header">
+                    <h2>Staff Management</h2>
+                    <button onclick="alert('Staff form can be added here.')">
+                        + Add Staff
+                    </button>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Department</th>
+                            <th>Phone</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td>Ahmed Raza</td>
+                            <td>Nurse</td>
+                            <td>Emergency</td>
+                            <td>0301-1112233</td>
+                        </tr>
+
+                        <tr>
+                            <td>Maria Khan</td>
+                            <td>Receptionist</td>
+                            <td>Reception</td>
+                            <td>0321-4445566</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports -->
+        <div id="reports" class="section">
+
+            <div class="content">
+                <h2>Hospital Reports</h2>
+
+                <br>
+
+                <div class="cards">
+                    <div class="card">
+                        <h3>Monthly Patients</h3>
+                        <div class="number">2,540</div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Monthly Revenue</h3>
+                        <div class="number">Rs. 4.8M</div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Surgeries</h3>
+                        <div class="number">128</div>
+                    </div>
+
+                    <div class="card">
+                        <h3>Discharged</h3>
+                        <div class="number">1,840</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+
+        // Section Navigation
+        function showSection(sectionId, element) {
+
+            document.querySelectorAll(".section").forEach(section => {
+                section.classList.remove("active");
+            });
+
+            document.getElementById(sectionId).classList.add("active");
+
+            document.querySelectorAll(".sidebar a").forEach(link => {
+                link.classList.remove("active");
+            });
+
+            if (element) {
+                element.classList.add("active");
+            }
+
+            document.getElementById("sidebar").classList.remove("show");
+        }
+
+
+        // Mobile Menu
+        function toggleMenu() {
+            document.getElementById("sidebar").classList.toggle("show");
+        }
+
+
+        // Add Patient
+        function addPatient() {
+
+            let name = prompt("Enter patient name:");
+
+            if (!name) {
+                return;
+            }
+
+            let age = prompt("Enter patient age:");
+
+            if (!age) {
+                return;
+            }
+
+            let gender = prompt("Enter gender:");
+
+            if (!gender) {
+                return;
+            }
+
+            let phone = prompt("Enter phone number:");
+
+            if (!phone) {
+                return;
+            }
+
+            let table = document.getElementById("patientTable");
+
+            let row = table.insertRow();
+
+            let id = "P" + String(table.rows.length + 1).padStart(3, "0");
+
+            row.innerHTML = `
+                <td>${id}</td>
+                <td>${name}</td>
+                <td>${age}</td>
+                <td>${gender}</td>
+                <td>${phone}</td>
+                <td>General</td>
+            `;
+
+            alert("Patient added successfully!");
+        }
+
+    </script>
+
+</body>
+</html>
