@@ -2,8 +2,7 @@
 
 A clean, modern, and responsive static dashboard for a Hospital Management System. This project is built using pure **HTML**, **CSS**, and **JavaScript**, making it lightweight and easy to integrate into any backend system.
 
-![Dashboard Preview](https://via.placeholder.com/1000x500?text=MediCare+Hospital+Management+Dashboard) 
-*(Note: Replace this placeholder image link with an actual screenshot of your project)*
+![Dashboard Preview](./preview.jpg)
 
 ## ✨ Features
 
@@ -19,14 +18,3 @@ A clean, modern, and responsive static dashboard for a Hospital Management Syste
 - **CSS3:** Custom styling, Flexbox/Grid layouts, and responsive design.
 - **JavaScript (Vanilla):** (Optional) For basic interactivity, dynamic data rendering, or future API integrations.
 
-## 📂 Project Structure
-
-```text
-medicare-dashboard/
-│
-├── index.html          # Main HTML structure
-├── css/
-│   └── style.css       # Styling and layout
-├── js/
-│   └── script.js       # (Optional) Dynamic functionality
-└── assets/             # Icons, images, and fonts
